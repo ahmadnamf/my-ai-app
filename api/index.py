@@ -6,39 +6,39 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# Konfigurasi API Key
+# Pastikan API KEY sudah ada di Environment Variables Vercel
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
 @app.route("/api/generate", methods=["POST"])
-def generate_questions():
+def generate():
     try:
         data = request.json
-        subject = data.get('mapel', 'Umum')
-        grade = data.get('kelas', 'SMP/SMA')
-        count = data.get('jumlah', 5)
-        level = data.get('sulit', 'Sedang')
-        q_type = data.get('tipe', 'Pilihan Ganda')
+        # Ambil data dari frontend
+        mapel = data.get('mapel', 'Umum')
+        kelas = data.get('kelas', 'SMP/SMA')
+        jumlah = data.get('jumlah', 5)
+        sulit = data.get('sulit', 'Sedang')
+        tipe = data.get('tipe', 'Pilihan Ganda')
 
-        # Gunakan nama model 'gemini-pro' untuk stabilitas lebih tinggi
-        # atau pastikan penulisan 'gemini-1.5-flash' sudah benar
+        # Gunakan 'gemini-1.5-flash' (Jika tetap error, ganti ke 'gemini-pro')
         model = genai.GenerativeModel("gemini-1.5-flash")
         
         prompt = (
-            f"Buatkan {count} soal {q_type} untuk mata pelajaran {subject} "
-            f"kelas {grade} dengan tingkat kesulitan {level}. "
-            f"Sertakan kunci jawaban di bagian akhir."
+            f"Buatkan {jumlah} soal {tipe} untuk mata pelajaran {mapel} "
+            f"kelas {kelas} dengan tingkat kesulitan {sulit}. "
+            f"Sertakan kunci jawaban di akhir soal."
         )
 
-        # Tambahkan konfigurasi safety agar tidak terblokir
         response = model.generate_content(prompt)
         
+        # Cek apakah ada hasil teks
         if response.text:
             return jsonify({"hasil": response.text})
         else:
-            return jsonify({"error": "Gemini tidak memberikan respon. Coba ganti topik."}), 500
+            return jsonify({"error": "AI tidak memberikan respon teks."}), 500
 
     except Exception as e:
-        # Menampilkan pesan error yang lebih detail di log Vercel
-        print(f"Error Detail: {str(e)}")
+        # Menampilkan error spesifik di log jika terjadi kegagalan
+        print(f"Detail Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
