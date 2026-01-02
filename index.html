@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Pembuat Soal</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; line-height: 1.6; }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+        button { background: #0070f3; color: white; border: none; cursor: pointer; font-weight: bold; }
+        #output { white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <h2>📝 Pembuat Soal Ujian SMP/SMA</h2>
+    <input type="text" id="mapel" placeholder="Mata Pelajaran (Contoh: Biologi)">
+    <select id="kelas">
+        <option value="7 SMP">7 SMP</option>
+        <option value="10 SMA">10 SMA</option>
+    </select>
+    <input type="number" id="jumlah" placeholder="Jumlah Soal" value="5">
+    <select id="sulit">
+        <option value="Mudah">Mudah</option>
+        <option value="Sedang">Sedang</option>
+        <option value="Sulit">Sulit</option>
+    </select>
+    <select id="tipe">
+        <option value="Pilihan Ganda">Pilihan Ganda</option>
+        <option value="Essay">Essay</option>
+    </select>
+    <button onclick="buatSoal()" id="btn">Buat Soal Sekarang</button>
+    <div id="output"></div>
+
+    <script>
+        async function buatSoal() {
+            const btn = document.getElementById('btn');
+            const out = document.getElementById('output');
+            btn.innerText = "Sedang Memproses...";
+            btn.disabled = true;
+            
+            const data = {
+                mapel: document.getElementById('mapel').value,
+                kelas: document.getElementById('kelas').value,
+                jumlah: document.getElementById('jumlah').value,
+                sulit: document.getElementById('sulit').value,
+                tipe: document.getElementById('tipe').value
+            };
+
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const json = await res.json();
+            out.style.display = "block";
+            out.innerText = json.hasil || "Error: " + json.error;
+            btn.innerText = "Buat Soal Sekarang";
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
