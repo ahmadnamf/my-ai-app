@@ -22,7 +22,7 @@ def generate():
         tipe = data.get('tipe', 'Pilihan Ganda')
 
         # Gunakan 'gemini-1.5-flash' (Jika tetap error, ganti ke 'gemini-pro')
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = model = genai.GenerativeModel("gemini-pro")
         
         prompt = (
             f"Buatkan {jumlah} soal {tipe} untuk mata pelajaran {mapel} "
@@ -42,3 +42,4 @@ def generate():
         # Menampilkan error spesifik di log jika terjadi kegagalan
         print(f"Detail Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
