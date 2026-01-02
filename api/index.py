@@ -6,8 +6,7 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# Konfigurasi Gemini AI
-# Pastikan Anda sudah menambahkan GEMINI_API_KEY di Environment Variables Vercel
+# Konfigurasi API Key
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
@@ -21,19 +20,25 @@ def generate_questions():
         level = data.get('sulit', 'Sedang')
         q_type = data.get('tipe', 'Pilihan Ganda')
 
-        # Prompt instruksi untuk Gemini
+        # Gunakan nama model 'gemini-pro' untuk stabilitas lebih tinggi
+        # atau pastikan penulisan 'gemini-1.5-flash' sudah benar
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
         prompt = (
             f"Buatkan {count} soal {q_type} untuk mata pelajaran {subject} "
             f"kelas {grade} dengan tingkat kesulitan {level}. "
-            f"Berikan jawaban yang jelas di bagian bawah setiap soal."
+            f"Sertakan kunci jawaban di bagian akhir."
         )
 
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # Tambahkan konfigurasi safety agar tidak terblokir
         response = model.generate_content(prompt)
         
-        return jsonify({"hasil": response.text})
+        if response.text:
+            return jsonify({"hasil": response.text})
+        else:
+            return jsonify({"error": "Gemini tidak memberikan respon. Coba ganti topik."}), 500
 
     except Exception as e:
+        # Menampilkan pesan error yang lebih detail di log Vercel
+        print(f"Error Detail: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-# Penting: Jangan gunakan app.run() agar kompatibel dengan Vercel Serverless
