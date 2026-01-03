@@ -11,7 +11,7 @@ def generate():
     try:
         data = request.json
         # Masukkan API Key asli Anda di sini
-        api_key = "AIzaSyDkU543vmAtz-WqzdnDRgU9a35ml6TYgp8" 
+        api_key = "AIza..........." 
         
         # Kita paksa langsung ke model gemini-1.5-flash
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
@@ -31,3 +31,4 @@ def generate():
         return jsonify({"hasil": text})
     except Exception as e:
         return jsonify({"error": f"Terjadi kesalahan: {str(e)}"}), 500
+
