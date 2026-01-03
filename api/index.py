@@ -6,39 +6,22 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# Ambil API Key dari Environment Variables
+# Ambil API Key dari Environment Variable
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
 @app.route("/api/generate", methods=["POST"])
-def generate_questions():
+def generate():
     try:
         data = request.json
-        prompt = (f"Buatkan {data.get('jumlah')} soal {data.get('tipe')} "
-                  f"{data.get('mapel')} kelas {data.get('kelas')} "
-                  f"kesulitan {data.get('sulit')}. Sertakan kunci jawaban.")
-
-        # DAFTAR MODEL YANG AKAN DICOBA (Dari yang terbaru ke paling stabil)
-        available_models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
+        # Gunakan model 'gemini-1.5-flash' yang paling umum
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-        response_text = ""
-        last_error = ""
-
-        for model_name in available_models:
-            try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(prompt)
-                response_text = response.text
-                if response_text:
-                    break # Berhasil, keluar dari loop
-            except Exception as e:
-                last_error = str(e)
-                continue # Coba model berikutnya jika 404
-
-        if response_text:
-            return jsonify({"hasil": response_text})
-        else:
-            return jsonify({"error": f"Semua model gagal. Error terakhir: {last_error}"}), 500
-
+        prompt = f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}. Sertakan jawaban."
+        
+        response = model.generate_content(prompt)
+        
+        return jsonify({"hasil": response.text})
     except Exception as e:
+        # Menampilkan detail error dari Google
         return jsonify({"error": str(e)}), 500
