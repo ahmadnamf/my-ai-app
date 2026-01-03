@@ -14,19 +14,13 @@ genai.configure(api_key=api_key)
 def generate():
     try:
         data = request.json
-        # Gunakan 'gemini-pro' untuk menghindari error 404 model not found
-        model = genai.GenerativeModel("gemini-pro")
-        
-        prompt = (f"Buatkan {data.get('jumlah')} soal {data.get('tipe')} "
-                  f"mata pelajaran {data.get('mapel')} kelas {data.get('kelas')}. "
-                  f"Sertakan kunci jawaban di akhir.")
+        prompt = f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}"
 
+        # Coba gunakan gemini-pro (Paling stabil untuk semua wilayah)
+        model = genai.GenerativeModel("gemini-pro")
         response = model.generate_content(prompt)
         
-        if response.text:
-            return jsonify({"hasil": response.text})
-        else:
-            return jsonify({"error": "AI tidak memberikan respon"}), 500
-
+        return jsonify({"hasil": response.text})
     except Exception as e:
+        # Jika gemini-pro juga gagal, tampilkan error aslinya
         return jsonify({"error": str(e)}), 500
