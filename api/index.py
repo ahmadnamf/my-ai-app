@@ -6,7 +6,7 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# Ambil API Key dari Environment Variable
+# Konfigurasi API
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
@@ -14,15 +14,14 @@ genai.configure(api_key=api_key)
 def generate():
     try:
         data = request.json
-        # Gunakan model 'gemini-1.5-flash' yang paling umum
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        # Gunakan model generik 'gemini-pro' atau 'gemini-1.5-flash'
+        # Cobalah ganti ke 'gemini-pro' jika 'flash' tetap 404
+        model = genai.GenerativeModel("gemini-pro")
         
-        prompt = f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}. Sertakan jawaban."
+        prompt = f"Buatkan 5 soal {data.get('mapel')} kelas {data.get('kelas')}. Berikan kunci jawabannya."
         
         response = model.generate_content(prompt)
         
         return jsonify({"hasil": response.text})
     except Exception as e:
-        # Menampilkan detail error dari Google
         return jsonify({"error": str(e)}), 500
-
