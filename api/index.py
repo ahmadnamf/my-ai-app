@@ -9,7 +9,7 @@ CORS(app)
 @app.route("/api/generate", methods=["POST"])
 def generate():
     try:
-        api_key = os.environ.get("GEMINI_API_KEY")
+        api_key = "AIzaSyDkU543vmAtz-WqzdnDRgU9a35ml6TYgp8"
         data = request.json
         
         # LANGKAH 1: Tanya Google model apa yang AKTIF untuk akun ini
@@ -48,3 +48,4 @@ def generate():
 
     except Exception as e:
         return jsonify({"error": f"Gagal pada tahap deteksi: {str(e)}"}), 500
+
