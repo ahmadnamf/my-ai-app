@@ -9,43 +9,25 @@ CORS(app)
 @app.route("/api/generate", methods=["POST"])
 def generate():
     try:
-        api_key = "AIzaSyDkU543vmAtz-WqzdnDRgU9a35ml6TYgp8"
         data = request.json
+        # Masukkan API Key asli Anda di sini
+        api_key = "AIzaSyDkU543vmAtz-WqzdnDRgU9a35ml6TYgp8" 
         
-        # LANGKAH 1: Tanya Google model apa yang AKTIF untuk akun ini
-        list_url = f"https://generativelanguage.googleapis.com/v1/models?key={api_key}"
-        list_response = requests.get(list_url)
-        models_data = list_response.json()
-        
-        # Ambil semua model yang mendukung generateContent
-        available_models = [
-            m["name"] for m in models_data.get("models", []) 
-            if "generateContent" in m.get("supportedGenerationMethods", [])
-        ]
-
-        if not available_models:
-            return jsonify({"error": "Akun Anda tidak memiliki model aktif. Pastikan API Key benar."}), 404
-
-        # LANGKAH 2: Pakai model pertama yang ditemukan
-        # Biasanya akan menemukan 'models/gemini-1.5-flash-8b' atau 'models/gemini-pro'
-        target_model = available_models[0]
-        gen_url = f"https://generativelanguage.googleapis.com/v1/{target_model}:generateContent?key={api_key}"
+        # Kita paksa langsung ke model gemini-1.5-flash
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
         
         payload = {
-            "contents": [{
-                "parts": [{"text": f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}. Sertakan jawaban."}]
-            }]
+            "contents": [{"parts": [{"text": f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}"}]}]
         }
 
-        response = requests.post(gen_url, json=payload)
-        result = response.json()
-        
-        text_output = result['candidates'][0]['content']['parts'][0]['text']
-        return jsonify({
-            "hasil": text_output, 
-            "info": f"Berhasil menggunakan model: {target_model}"
-        })
+        response = requests.post(url, json=payload)
+        res_json = response.json()
 
+        # Jika Google memberikan error, kita tampilkan pesan error aslinya di sini
+        if "error" in res_json:
+            return jsonify({"error": f"Pesan asli Google: {res_json['error']['message']}"}), 400
+
+        text = res_json['candidates'][0]['content']['parts'][0]['text']
+        return jsonify({"hasil": text})
     except Exception as e:
-        return jsonify({"error": f"Gagal pada tahap deteksi: {str(e)}"}), 500
-
+        return jsonify({"error": f"Terjadi kesalahan: {str(e)}"}), 500
