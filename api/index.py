@@ -15,7 +15,7 @@ def generate():
     try:
         data = request.json
         # Gunakan model 'gemini-1.5-flash' yang paling umum
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         prompt = f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}. Sertakan jawaban."
         
@@ -25,3 +25,4 @@ def generate():
     except Exception as e:
         # Menampilkan detail error dari Google
         return jsonify({"error": str(e)}), 500
+
