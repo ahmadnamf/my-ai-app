@@ -8,7 +8,9 @@ CORS(app)
 
 # Ambil API Key dari Environment Variable Vercel
 api_key = os.environ.get("GEMINI_API_KEY")
-genai.configure(api_key=api_key)
+
+# Konfigurasi dengan versi API 'v1' (menghindari masalah v1beta)
+genai.configure(api_key=api_key, transport='rest')
 
 @app.route("/api/generate", methods=["POST"])
 def generate():
@@ -16,28 +18,16 @@ def generate():
         data = request.json
         prompt = f"Buat 3 soal {data.get('mapel')} kelas {data.get('kelas')}. Sertakan kunci jawaban."
 
-        # DAFTAR MODEL UNTUK DICOBA (Urutan dari yang paling mungkin berhasil)
-        # Gunakan 'gemini-1.5-flash-latest' atau 'gemini-1.0-pro'
-        model_names = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"]
+        # Gunakan nama model yang paling standar saat ini
+        model = genai.GenerativeModel("gemini-1.5-flash")
         
-        response_text = None
-        error_msg = ""
-
-        for name in model_names:
-            try:
-                model = genai.GenerativeModel(name)
-                response = model.generate_content(prompt)
-                response_text = response.text
-                if response_text:
-                    break
-            except Exception as e:
-                error_msg = str(e)
-                continue
-
-        if response_text:
-            return jsonify({"hasil": response_text})
+        response = model.generate_content(prompt)
+        
+        if response.text:
+            return jsonify({"hasil": response.text})
         else:
-            return jsonify({"error": f"Model tidak ditemukan di wilayah ini. Detail: {error_msg}"}), 404
+            return jsonify({"error": "Respon kosong dari AI"}), 500
 
     except Exception as e:
+        # Jika masih gagal, kirim pesan error yang lebih bersih
         return jsonify({"error": str(e)}), 500
